@@ -13,9 +13,7 @@ import { UsersModule } from './users/users.module';
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.DB_CONNECTION),
-
     AuthModule,
-    UsersModule,
   ],
 })
 export class AppModule {}
