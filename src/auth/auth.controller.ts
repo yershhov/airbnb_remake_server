@@ -16,11 +16,6 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('signIn')
-  async signIn(): Promise<string> {
-    return 'a';
-  }
-
   @Post('signUp')
   @HttpCode(201)
   async signUp(@Body() signUpDto: SignUpDto, @Res() res: Response) {
