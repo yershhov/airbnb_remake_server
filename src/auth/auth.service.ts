@@ -1,14 +1,32 @@
-import { Injectable } from '@nestjs/common';
-import { UserService } from 'src/models/user/user.service';
-import { User } from 'src/models/user/user.schema';
-import { CreateUserDto as SignUpDto } from 'src/dto/createUser.dto';
+import { Injectable, Res } from '@nestjs/common';
+import { UsersService } from 'src/users/users.service';
+import { User } from 'src/users/users.schema';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+
+async function hash(password: string): Promise<string> {
+  return await bcrypt.hash(password, Number(process.env.HASH_SALT));
+}
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly usersService: UsersService) {}
 
-  async signUp(signUpDto: SignUpDto): Promise<User> {
-    const user = await this.userService.create(signUpDto);
-    return user;
+  async signUp(user: User): Promise<User> {
+    const hashed = await hash(user.password);
+
+    return await this.usersService.createUser({ ...user, password: hashed });
+  }
+
+  async signIn(user: User) {
+    const getUser = await this.usersService.findOne(user.username);
+    if (getUser !== null) {
+      if (await bcrypt.compare(user.password, getUser.password)) {
+        return getUser;
+      }
+      return null;
+    } else {
+      return null;
+    }
   }
 }
