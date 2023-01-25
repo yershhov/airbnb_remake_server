@@ -1,33 +1,21 @@
-import { Injectable, Res } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
-import { User } from 'src/users/users.schema';
+import { Injectable } from '@nestjs/common';
+import { CreateUserDto } from 'src/users/dto/createUser.dto';
+import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
-import { UserSignInCredentialsDataModel } from 'src/users/interfaces/UserSignInCredentials.dataModel';
-import { UserDataModel } from 'src/users/interfaces/User.dataModel';
-
-async function hash(password: string): Promise<string> {
-  return await bcrypt.hash(password, Number(process.env.HASH_SALT));
-}
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private usersService: UsersService) {}
 
-  async signUp(user: UserDataModel): Promise<User> {
-    const hashed = await hash(user.password);
+  async signUp(createUserDto: CreateUserDto) {
+    const hashedPassword = await bcrypt.hash(
+      createUserDto.password,
+      Number(process.env.HASH_SALT),
+    );
 
-    return await this.usersService.createUser({ ...user, password: hashed });
-  }
-
-  async signIn(user: UserSignInCredentialsDataModel) {
-    const getUser = await this.usersService.findOne(user.email);
-    if (getUser !== null) {
-      if (await bcrypt.compare(user.password, getUser.password)) {
-        return getUser;
-      }
-      return 'wrong pass';
-    } else {
-      return 'wrong username';
-    }
+    return this.usersService.createUser({
+      ...createUserDto,
+      password: hashedPassword,
+    });
   }
 }
