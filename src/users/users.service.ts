@@ -13,4 +13,8 @@ export class UsersService {
   async createUser(createUserDto: CreateUserDto) {
     return this.userModel.create(createUserDto);
   }
+
+  async findOne(email: string) {
+    return this.userModel.findOne({ email });
+  }
 }
